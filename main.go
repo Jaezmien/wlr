@@ -67,11 +67,25 @@ func ChangeWlan(ssid string, password string) (bool, error) {
 	ctx, c := context.WithTimeout(context.Background(), time.Duration(15)*time.Second)
 	defer c()
 
-	cmd := exec.CommandContext(ctx, "nmcli", "device", "wifi", "connect", ssid, "password", password)
-	_, err := cmd.Output()
+	slog.Debug("rescanning wifi...")
+
+	cmd := exec.CommandContext(ctx, "nmcli", "device", "wifi", "rescan")
+	output, err := cmd.CombinedOutput()
 	if err != nil {
-		return false, fmt.Errorf("error while trying to change wlan: %v", err)
+		return false, fmt.Errorf("error while rescanning wifi: %v (%s)", err, output)
 	}
+
+	// pause for a bit
+	time.Sleep(time.Duration(3) * time.Second)
+
+	slog.Debug("attempting wlan connection", slog.String("ssid", ssid))
+
+	cmd = exec.CommandContext(ctx, "nmcli", "device", "wifi", "connect", ssid, "password", password)
+	output, err = cmd.CombinedOutput()
+	if err != nil {
+		return false, fmt.Errorf("error while changing wlan: %v (%s)", err, output)
+	}
+
 	return true, nil
 }
 
