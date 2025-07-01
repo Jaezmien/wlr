@@ -95,7 +95,7 @@ func TestConnection() bool {
 		return false
 	}
 
-	slog.Debug("testing connection...")
+	slog.Debug("testing connection")
 
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
@@ -118,7 +118,7 @@ func main() {
 	}
 
 	for _, e := range entries {
-		slog.Debug("changing wlan connection...", slog.Any("ssid", e.SSID))
+		slog.Debug("attempting wlan connection", slog.Any("ssid", e.SSID))
 
 		if _, err := ChangeWlan(e.SSID, e.Password); err != nil {
 			slog.Debug("error while trying to change wlan", slog.Any("error", err))
